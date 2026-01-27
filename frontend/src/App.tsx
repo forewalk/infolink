@@ -6,6 +6,9 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { LoginPage } from '@/pages/LoginPage'
 import { ProductsPage } from '@/pages/ProductsPage'
+import { BoardListPage } from '@/pages/BoardListPage'
+import { BoardDetailPage } from '@/pages/BoardDetailPage'
+import { BoardWritePage } from '@/pages/BoardWritePage'
 import './App.css'
 
 /**
@@ -49,8 +52,8 @@ function App() {
 
   return (
     <Routes>
-      {/* 루트: /products로 리다이렉트 */}
-      <Route path="/" element={<Navigate to="/products" replace />} />
+      {/* 루트: /login으로 리다이렉트 */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* 로그인 페이지: 비로그인 시만 접근 */}
       <Route
@@ -72,8 +75,42 @@ function App() {
         }
       />
 
-      {/* 404: 상품 페이지로 리다이렉트 */}
-      <Route path="*" element={<Navigate to="/products" replace />} />
+      {/* 게시판: 목록/상세는 게스트 가능, 작성/수정은 인증 필요 */}
+      <Route
+        path="/board"
+        element={
+          <PrivateRoute>
+            <BoardListPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/board/write"
+        element={
+          <PrivateRoute>
+            <BoardWritePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/board/edit/:id"
+        element={
+          <PrivateRoute>
+            <BoardWritePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/board/:id"
+        element={
+          <PrivateRoute>
+            <BoardDetailPage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* 404: 로그인 페이지로 리다이렉트 */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

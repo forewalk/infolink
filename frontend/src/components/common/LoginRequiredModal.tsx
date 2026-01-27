@@ -1,17 +1,19 @@
 /**
- * 비회원 모드 안내 모달
+ * 로그인 필요 안내 모달 (비회원 글쓰기 시 거부 팝업)
+ * reject.svg 디자인 기반
  */
 import { useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-interface GuestModeModalProps {
+interface LoginRequiredModalProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: () => void
 }
 
-export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalProps) {
-  const { t } = useTranslation(['auth', 'common'])
+export function LoginRequiredModal({ isOpen, onClose }: LoginRequiredModalProps) {
+  const { t } = useTranslation(['auth', 'board'])
+  const navigate = useNavigate()
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -21,6 +23,11 @@ export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalPro
     },
     [onClose]
   )
+
+  const handleGoToLogin = useCallback(() => {
+    onClose()
+    navigate('/login')
+  }, [onClose, navigate])
 
   if (!isOpen) return null
 
@@ -48,17 +55,37 @@ export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalPro
           maxWidth: '320px',
           width: '90%',
           textAlign: 'center',
+          position: 'relative',
         }}
       >
+        {/* X 닫기 버튼 */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'none',
+            border: 'none',
+            fontSize: '18px',
+            color: 'var(--text-tertiary)',
+            cursor: 'pointer',
+            padding: '4px',
+            lineHeight: 1,
+          }}
+        >
+          ✕
+        </button>
+
         <h3
           style={{
-            margin: '0 0 16px 0',
+            margin: '8px 0 16px 0',
             fontSize: '18px',
             fontWeight: '600',
             color: 'var(--text-primary)',
           }}
         >
-          {t('auth:guestModeTitle')}
+          {t('auth:loginRequired')}
         </h3>
         <p
           style={{
@@ -69,7 +96,7 @@ export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalPro
             whiteSpace: 'pre-line',
           }}
         >
-          {t('auth:guestModeWarning')}
+          {t('board:writeLoginRequired')}
         </p>
         <div
           style={{
@@ -84,17 +111,17 @@ export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalPro
               padding: '12px',
               borderRadius: '8px',
               border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
+              backgroundColor: 'var(--bg-tertiary)',
               color: 'var(--text-secondary)',
               fontSize: '14px',
               fontWeight: '500',
               cursor: 'pointer',
             }}
           >
-            {t('common:cancel')}
+            {t('auth:maybeLater')}
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleGoToLogin}
             style={{
               flex: 1,
               padding: '12px',
@@ -107,7 +134,7 @@ export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalPro
               cursor: 'pointer',
             }}
           >
-            {t('common:confirm')}
+            {t('common:goToLogin')}
           </button>
         </div>
       </div>

@@ -1,40 +1,40 @@
 """
-Alembic 환경 설정
+Alembic Environment Configuration
 """
-import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool
+from sqlalchemy import pool, engine_from_config
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-# Alembic Config 객체
+# Alembic Config object
 config = context.config
 
-# 로깅 설정
+# Logging configuration
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# 모델의 MetaData 객체 가져오기
+# Import models MetaData
 from app.database import Base
 from app.config import settings
 
-# 모든 모델 import (마이그레이션 자동 감지를 위해 필요)
+# Import all models for autogenerate detection
 from app.models.base import BaseModel  # noqa
 from app.models.user import User  # noqa
+from app.models.board import Board  # noqa
 
 target_metadata = Base.metadata
 
-# 환경변수에서 DATABASE_URL 가져오기
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace('+asyncpg', '+psycopg2'))
+# Set DATABASE_URL (convert asyncpg to psycopg2 for sync migrations)
+sync_url = settings.DATABASE_URL.replace('+asyncpg', '+psycopg2').replace('postgresql+asyncpg', 'postgresql+psycopg2')
+config.set_main_option("sqlalchemy.url", sync_url)
 
 
 def run_migrations_offline() -> None:
     """
-    오프라인 모드로 마이그레이션 실행
-    DB 연결 없이 SQL 스크립트만 생성
+    Run migrations in offline mode.
+    Generates SQL scripts without DB connection.
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
@@ -48,37 +48,25 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def do_run_migrations(connection: Connection) -> None:
-    """실제 마이그레이션 실행"""
-    context.configure(connection=connection, target_metadata=target_metadata)
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-async def run_async_migrations() -> None:
-    """비동기로 마이그레이션 실행"""
-    configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL.replace('+asyncpg', '+psycopg2')
-
-    connectable = async_engine_from_config(
-        configuration,
+def run_migrations_online() -> None:
+    """
+    Run migrations in online mode.
+    Connects to actual DB and performs migrations.
+    """
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+        )
 
-    await connectable.dispose()
-
-
-def run_migrations_online() -> None:
-    """
-    온라인 모드로 마이그레이션 실행
-    실제 DB에 연결하여 마이그레이션 수행
-    """
-    asyncio.run(run_async_migrations())
+        with context.begin_transaction():
+            context.run_migrations()
 
 
 if context.is_offline_mode():

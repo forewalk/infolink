@@ -5,11 +5,11 @@ import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import * as authService from '@/services/authService'
-import type { LoginRequest, AuthError } from '@/types/auth'
+import type { LoginRequest, AuthError, User } from '@/types/auth'
 
 interface UseAuthReturn {
   // 상태
-  user: ReturnType<typeof useAuthStore>['user']
+  user: User | null
   isAuthenticated: boolean
   isGuest: boolean
 

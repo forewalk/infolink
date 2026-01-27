@@ -2,7 +2,7 @@
  * 인증 API 서비스
  */
 import api from '@/services/api'
-import type { LoginRequest, LoginResponse, User, AuthError, AuthErrorType } from '@/types/auth'
+import type { LoginRequest, LoginResponse, User, AuthError } from '@/types/auth'
 import { AxiosError } from 'axios'
 
 /**

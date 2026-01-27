@@ -3,12 +3,13 @@ API v1 라우터 통합
 """
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth
+from app.api.v1.endpoints import auth, boards
 
 api_router = APIRouter()
 
 # 엔드포인트 라우터 등록
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(boards.router, prefix="/boards", tags=["boards"])
 
 
 @api_router.get("/ping")

@@ -1,25 +1,34 @@
 /**
  * 로그인 페이지
  * 피그마 디자인 기반 (375x812 모바일 우선)
+ * 다크모드 + 다국어 지원
  */
 import { useState, useCallback, FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
+import { useThemeStore } from '@/store/themeStore'
 import { GuestModeModal } from '@/components/common/GuestModeModal'
 
 export function LoginPage() {
+  const { t, i18n } = useTranslation(['auth', 'common'])
   const { login, enterGuestMode } = useAuth()
+  const { theme, toggleTheme } = useThemeStore()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showGuestModal, setShowGuestModal] = useState(false)
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng)
+  }
+
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
 
       if (!email || !password) {
-        alert('이메일과 비밀번호를 입력해주세요.')
+        alert(t('auth:emailRequired'))
         return
       }
 
@@ -31,7 +40,7 @@ export function LoginPage() {
         alert(result.error.message)
       }
     },
-    [email, password, login]
+    [email, password, login, t]
   )
 
   const handleGuestClick = useCallback(() => {
@@ -47,7 +56,7 @@ export function LoginPage() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#FAFAFA',
+        backgroundColor: 'var(--bg-primary)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -56,6 +65,50 @@ export function LoginPage() {
         overflow: 'hidden',
       }}
     >
+      {/* 상단 컨트롤: 언어 선택 + 다크모드 토글 */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          display: 'flex',
+          gap: '8px',
+          zIndex: 2,
+        }}
+      >
+        <select
+          value={i18n.language}
+          onChange={(e) => changeLanguage(e.target.value)}
+          style={{
+            padding: '6px 12px',
+            borderRadius: '6px',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+          }}
+        >
+          <option value="ko">한글</option>
+          <option value="en">English</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          style={{
+            padding: '6px 12px',
+            borderRadius: '6px',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            fontSize: '16px',
+          }}
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      </div>
+
       {/* 장식 원형 요소 */}
       <div
         style={{
@@ -110,22 +163,22 @@ export function LoginPage() {
         style={{
           fontSize: '24px',
           fontWeight: '600',
-          color: '#1A1A1A',
+          color: 'var(--text-primary)',
           margin: '0 0 8px 0',
           zIndex: 1,
         }}
       >
-        Infolink
+        {t('common:appName')}
       </h1>
       <p
         style={{
           fontSize: '14px',
-          color: '#666666',
+          color: 'var(--text-secondary)',
           margin: '0 0 40px 0',
           zIndex: 1,
         }}
       >
-        상품 정보를 한눈에
+        {t('auth:appDescription')}
       </p>
 
       {/* 로그인 폼 */}
@@ -140,7 +193,7 @@ export function LoginPage() {
         <div style={{ marginBottom: '16px' }}>
           <input
             type="email"
-            placeholder="이메일"
+            placeholder={t('auth:email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -149,9 +202,9 @@ export function LoginPage() {
               padding: '16px',
               borderRadius: '12px',
               border: 'none',
-              backgroundColor: '#F0F0F0',
+              backgroundColor: 'var(--bg-tertiary)',
               fontSize: '16px',
-              color: '#1A1A1A',
+              color: 'var(--text-primary)',
               outline: 'none',
               boxSizing: 'border-box',
             }}
@@ -161,7 +214,7 @@ export function LoginPage() {
         <div style={{ marginBottom: '24px' }}>
           <input
             type="password"
-            placeholder="비밀번호"
+            placeholder={t('auth:password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
@@ -170,9 +223,9 @@ export function LoginPage() {
               padding: '16px',
               borderRadius: '12px',
               border: 'none',
-              backgroundColor: '#F0F0F0',
+              backgroundColor: 'var(--bg-tertiary)',
               fontSize: '16px',
-              color: '#1A1A1A',
+              color: 'var(--text-primary)',
               outline: 'none',
               boxSizing: 'border-box',
             }}
@@ -187,7 +240,7 @@ export function LoginPage() {
             padding: '16px',
             borderRadius: '12px',
             border: 'none',
-            backgroundColor: isLoading ? '#CCCCCC' : '#4CAF50',
+            backgroundColor: isLoading ? 'var(--border-color)' : '#4CAF50',
             color: '#fff',
             fontSize: '16px',
             fontWeight: '600',
@@ -195,7 +248,7 @@ export function LoginPage() {
             marginBottom: '16px',
           }}
         >
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoading ? t('auth:loggingIn') : t('auth:loginButton')}
         </button>
 
         <button
@@ -208,12 +261,12 @@ export function LoginPage() {
             borderRadius: '12px',
             border: 'none',
             backgroundColor: 'transparent',
-            color: '#999999',
+            color: 'var(--text-tertiary)',
             fontSize: '14px',
             cursor: 'pointer',
           }}
         >
-          비회원으로 둘러보기
+          {t('auth:guestMode')}
         </button>
       </form>
 
