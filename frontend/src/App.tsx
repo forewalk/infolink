@@ -9,7 +9,6 @@ import { ProductsPage } from '@/pages/ProductsPage'
 import { BoardListPage } from '@/pages/BoardListPage'
 import { BoardDetailPage } from '@/pages/BoardDetailPage'
 import { BoardWritePage } from '@/pages/BoardWritePage'
-import './App.css'
 
 /**
  * 인증된 사용자만 접근 가능한 라우트
