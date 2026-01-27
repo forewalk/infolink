@@ -28,6 +28,11 @@
 - `ko/auth.json`, `en/auth.json`: appDescription, loggingIn, emailRequired, guestModeTitle, guestModeWarning, loginRequired, maybeLater 추가
 - `ko/board.json`, `en/board.json`: writeLoginRequired 추가
 
+### 불필요한 파일 정리
+- `frontend/figma/main.svg` 삭제 (0바이트 빈 파일)
+- `frontend/src/App.css` 삭제 (미사용 CSS) + `App.tsx`에서 import 제거
+- `docs/workflows/ui-enhancement/5~9_*_placeholder.md` 삭제 (빈 placeholder 5개)
+
 ---
 
 ## 2026-01-26 - 로그인 기능 구현
