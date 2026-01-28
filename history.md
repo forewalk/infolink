@@ -1,5 +1,36 @@
 # 작업 이력
 
+## 2026-01-28 - Docker 컨테이너 배포 구성
+
+### Docker 파일 생성
+- `backend/Dockerfile`: 멀티 스테이지 빌드 (python:3.11-slim), psycopg2-binary 포함
+- `backend/entrypoint.sh`: Alembic 마이그레이션 자동 실행 후 Uvicorn 시작
+- `backend/.dockerignore`: 테스트/스크립트/환경파일 제외
+- `frontend/Dockerfile`: 멀티 스테이지 빌드 (node:18-alpine → nginx:1.25-alpine)
+- `frontend/nginx.conf`: SPA fallback + `/api/` 리버스 프록시 설정
+- `frontend/.dockerignore`: node_modules/dist/figma 제외
+
+### 오케스트레이션
+- `docker-compose.yml`: frontend + backend 2개 서비스 (PostgreSQL은 호스트 직접 운영)
+- `extra_hosts: host.docker.internal:host-gateway`로 컨테이너에서 호스트 DB 접속
+- 백엔드 healthcheck (python urllib 사용)
+- `.env.production.example`: 프로덕션 환경변수 템플릿
+
+### 빌드/배포 스크립트
+- `scripts/build.sh`: docker compose build → docker save → tar.gz 패키징
+- `scripts/deploy.sh`: docker load → docker compose up -d 자동 배포
+
+### 코드 수정
+- `backend/requirements.txt`: psycopg2-binary==2.9.9 추가 (Alembic 마이그레이션용)
+- `frontend/src/services/api.ts`: API base URL 절대경로 → 상대경로 변경 (`/api/v1`)
+
+### 문서
+- `docs/DEPLOY.md`: 배포 가이드 (빌드, 파일 전달, 서버 설정, 트러블슈팅)
+- `docs/workflows/docker-deploy/1_spec.md`: 기획서
+- `docs/workflows/docker-deploy/4_dev_plan.md`: 개발 계획서
+
+---
+
 ## 2026-01-28 - MUI 전체 도입
 
 ### MUI (Material UI) 마이그레이션
