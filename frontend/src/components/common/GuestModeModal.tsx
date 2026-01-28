@@ -1,7 +1,12 @@
 /**
  * 비회원 모드 안내 모달
  */
-import { useCallback } from 'react'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 
 interface GuestModeModalProps {
@@ -13,104 +18,33 @@ interface GuestModeModalProps {
 export function GuestModeModal({ isOpen, onClose, onConfirm }: GuestModeModalProps) {
   const { t } = useTranslation(['auth', 'common'])
 
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-        onClose()
-      }
-    },
-    [onClose]
-  )
-
-  if (!isOpen) return null
-
   return (
-    <div
-      onClick={handleBackdropClick}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '16px',
-          padding: '24px',
-          maxWidth: '320px',
-          width: '90%',
-          textAlign: 'center',
-        }}
-      >
-        <h3
-          style={{
-            margin: '0 0 16px 0',
-            fontSize: '18px',
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-          }}
-        >
-          {t('auth:guestModeTitle')}
-        </h3>
-        <p
-          style={{
-            margin: '0 0 24px 0',
-            fontSize: '14px',
-            color: 'var(--text-secondary)',
-            lineHeight: '1.5',
-            whiteSpace: 'pre-line',
-          }}
+    <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ textAlign: 'center', fontWeight: 600 }}>
+        {t('auth:guestModeTitle')}
+      </DialogTitle>
+      <DialogContent>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: 'center', lineHeight: 1.5, whiteSpace: 'pre-line' }}
         >
           {t('auth:guestModeWarning')}
-        </p>
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-          }}
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          fullWidth
+          sx={{ borderColor: 'custom.borderColor', color: 'text.secondary' }}
         >
-          <button
-            onClick={onClose}
-            style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-            }}
-          >
-            {t('common:cancel')}
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: '#4CAF50',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-            }}
-          >
-            {t('common:confirm')}
-          </button>
-        </div>
-      </div>
-    </div>
+          {t('common:cancel')}
+        </Button>
+        <Button onClick={onConfirm} variant="contained" color="secondary" fullWidth>
+          {t('common:confirm')}
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }

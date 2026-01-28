@@ -7,7 +7,7 @@
 | 영역 | 기술 |
 |------|------|
 | Backend | FastAPI, SQLAlchemy (async), PostgreSQL, Alembic |
-| Frontend | React, TypeScript, Vite, Zustand |
+| Frontend | React, TypeScript, Vite, Zustand, MUI (Material UI) |
 | 인증 | JWT (python-jose, bcrypt) |
 
 ## 빠른 시작

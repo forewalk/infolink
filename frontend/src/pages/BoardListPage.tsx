@@ -1,19 +1,25 @@
 /**
- * 게시판 목록 페이지 - 카드형 레이아웃
+ * 게시판 목록 페이지 - MUI 카드형 레이아웃
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardActionArea from '@mui/material/CardActionArea'
+import Typography from '@mui/material/Typography'
+import Stack from '@mui/material/Stack'
 import { useAuthStore } from '@/store/authStore'
-import { useThemeStore } from '@/store/themeStore'
 import { getBoards, BoardListItem } from '@/services/boardService'
 import { LoginRequiredModal } from '@/components/common/LoginRequiredModal'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 export function BoardListPage() {
   const { t, i18n } = useTranslation(['board', 'common', 'auth'])
   const navigate = useNavigate()
-  const { isAuthenticated, isGuest, logout } = useAuthStore()
-  const { theme, toggleTheme } = useThemeStore()
+  const { isAuthenticated } = useAuthStore()
 
   const [boards, setBoards] = useState<BoardListItem[]>([])
   const [nextCursor, setNextCursor] = useState<number | null>(null)
@@ -62,11 +68,6 @@ export function BoardListPage() {
     navigate('/board/write')
   }
 
-  // 언어 변경
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng)
-  }
-
   // 날짜 포맷
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -84,222 +85,86 @@ export function BoardListPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--bg-primary)',
-        padding: '24px',
-      }}
-    >
-      {/* 헤더 */}
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => navigate('/products')}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: '16px',
-              lineHeight: 1,
-            }}
-          >
-            ←
-          </button>
-          <h1
-            style={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
-            {t('board:board')}
-          </h1>
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {/* 언어 선택 */}
-          <select
-            value={i18n.language}
-            onChange={(e) => changeLanguage(e.target.value)}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="ko">한글</option>
-            <option value="en">English</option>
-          </select>
-
-          {/* 다크모드 토글 */}
-          <button
-            onClick={toggleTheme}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              fontSize: '16px',
-            }}
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-
-          {/* 로그아웃 버튼 */}
-          <button
-            onClick={logout}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              fontSize: '14px',
-              cursor: 'pointer',
-            }}
-          >
-            {isGuest ? t('common:goToLogin') : t('auth:logout')}
-          </button>
-        </div>
-      </header>
-
+    <AppLayout title={t('board:board')} showBack backTo="/products">
       {/* 글쓰기 버튼 */}
-      <div style={{ marginBottom: '16px', textAlign: 'right' }}>
-        <button
-          onClick={handleWrite}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '8px',
-            border: 'none',
-            backgroundColor: 'var(--btn-primary-bg)',
-            color: 'var(--btn-primary-text)',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-          }}
-        >
+      <Box sx={{ mb: 2, textAlign: 'right' }}>
+        <Button variant="contained" color="primary" onClick={handleWrite}>
           {t('board:write')}
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* 게시글 카드 목록 */}
       {initialLoading ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+        <Typography color="text.disabled" sx={{ py: 5, textAlign: 'center' }}>
           {t('common:loading')}
-        </div>
+        </Typography>
       ) : boards.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+        <Typography color="text.disabled" sx={{ py: 5, textAlign: 'center' }}>
           {t('board:noBoards')}
-        </div>
+        </Typography>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <Stack spacing={1.5}>
           {boards.map((board) => (
-            <div
-              key={board.id}
-              onClick={() => navigate(`/board/${board.id}`)}
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '12px',
-                padding: '16px 20px',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'box-shadow 0.15s, transform 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = 'var(--shadow-md)'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-            >
-              {/* 제목 */}
-              <h3
-                style={{
-                  margin: '0 0 8px 0',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: 'var(--text-primary)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {board.title}
-              </h3>
+            <Card key={board.id} elevation={1} sx={{ borderRadius: 3 }}>
+              <CardActionArea onClick={() => navigate(`/board/${board.id}`)}>
+                <CardContent sx={{ px: 2.5, py: 2 }}>
+                  {/* 제목 */}
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    noWrap
+                    sx={{ mb: 1 }}
+                  >
+                    {board.title}
+                  </Typography>
 
-              {/* 내용 미리보기 */}
-              <p
-                style={{
-                  margin: '0 0 12px 0',
-                  fontSize: '14px',
-                  color: 'var(--text-secondary)',
-                  lineHeight: '1.5',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                }}
-              >
-                {getPreview(board.content)}
-              </p>
+                  {/* 내용 미리보기 */}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mb: 1.5,
+                      lineHeight: 1.5,
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {getPreview(board.content)}
+                  </Typography>
 
-              {/* 메타 정보 */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  fontSize: '13px',
-                  color: 'var(--text-tertiary)',
-                }}
-              >
-                <span>{board.author_name}</span>
-                <span>{formatDate(board.created_at)}</span>
-                <span>{t('board:viewCount')} {board.view_count}</span>
-              </div>
-            </div>
+                  {/* 메타 정보 */}
+                  <Stack direction="row" spacing={2}>
+                    <Typography variant="caption" color="text.disabled">
+                      {board.author_name}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      {formatDate(board.created_at)}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      {t('board:viewCount')} {board.view_count}
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </CardActionArea>
+            </Card>
           ))}
-        </div>
+        </Stack>
       )}
 
       {/* 더 보기 버튼 */}
       {hasMore && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <button
+        <Box sx={{ mt: 2.5, textAlign: 'center' }}>
+          <Button
+            variant="outlined"
             onClick={loadMore}
             disabled={loading}
-            style={{
-              padding: '10px 24px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              fontSize: '14px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1,
-            }}
+            sx={{ borderColor: 'custom.borderColor', color: 'text.secondary' }}
           >
             {loading ? t('common:loading') : t('board:loadMore')}
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
 
       {/* 비회원 글쓰기 거부 모달 */}
@@ -307,6 +172,6 @@ export function BoardListPage() {
         isOpen={showLoginRequiredModal}
         onClose={() => setShowLoginRequiredModal(false)}
       />
-    </div>
+    </AppLayout>
   )
 }

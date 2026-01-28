@@ -1,5 +1,6 @@
 /**
  * 테마 상태 관리 스토어 (Zustand)
+ * MUI ThemeProvider가 테마를 적용하므로 DOM 조작 불필요
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -23,55 +24,25 @@ const getSystemTheme = (): Theme => {
   return 'light'
 }
 
-// 테마를 DOM에 적용
-const applyTheme = (theme: Theme) => {
-  if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-theme', theme)
-  }
-}
-
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       // 초기 상태: 시스템 테마 또는 저장된 테마
-      theme: 'light',
+      theme: getSystemTheme(),
 
       // 테마 설정
       setTheme: (theme: Theme) => {
-        applyTheme(theme)
         set({ theme })
       },
 
       // 테마 토글
       toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light'
-        applyTheme(newTheme)
         set({ theme: newTheme })
       },
     }),
     {
       name: 'theme-storage',
-      // hydration 시 테마 적용
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          applyTheme(state.theme)
-        }
-      },
     }
   )
 )
-
-// 초기 로드 시 저장된 테마 또는 시스템 테마 적용 (FOUC 방지)
-if (typeof window !== 'undefined') {
-  const stored = localStorage.getItem('theme-storage')
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      applyTheme(parsed.state?.theme || getSystemTheme())
-    } catch {
-      applyTheme(getSystemTheme())
-    }
-  } else {
-    applyTheme(getSystemTheme())
-  }
-}

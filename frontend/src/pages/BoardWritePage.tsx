@@ -4,9 +4,15 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useAuthStore } from '@/store/authStore'
-import { useThemeStore } from '@/store/themeStore'
 import { createBoard, updateBoard, getBoard } from '@/services/boardService'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 const TITLE_MAX = 200
 const CONTENT_MAX = 10000
@@ -16,7 +22,6 @@ export function BoardWritePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
-  const { theme, toggleTheme } = useThemeStore()
 
   const isEditMode = !!id
 
@@ -96,225 +101,94 @@ export function BoardWritePage() {
 
   if (initialLoading) {
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           minHeight: '100vh',
-          backgroundColor: 'var(--bg-primary)',
+          bgcolor: 'background.default',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'var(--text-tertiary)',
         }}
       >
-        {t('common:loading')}
-      </div>
+        <Typography color="text.disabled">{t('common:loading')}</Typography>
+      </Box>
     )
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--bg-primary)',
-        padding: '24px',
-      }}
-    >
-      {/* 헤더 */}
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
+    <AppLayout title={isEditMode ? t('board:editPost') : t('board:write')}>
+      <Paper
+        component="form"
+        onSubmit={handleSubmit}
+        elevation={1}
+        sx={{ p: 3, borderRadius: 3 }}
       >
-        <h1
-          style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-            margin: 0,
+        {/* 제목 입력 */}
+        <TextField
+          fullWidth
+          variant="outlined"
+          label={t('board:title')}
+          placeholder={t('board:titlePlaceholder')}
+          value={title}
+          onChange={(e) => {
+            if (e.target.value.length <= TITLE_MAX) {
+              setTitle(e.target.value)
+            }
           }}
-        >
-          {isEditMode ? t('board:editPost') : t('board:write')}
-        </h1>
-
-        <button
-          onClick={toggleTheme}
-          style={{
-            padding: '6px 12px',
-            borderRadius: '6px',
-            border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            fontSize: '16px',
+          disabled={loading}
+          helperText={t('board:charCount', { current: title.length, max: TITLE_MAX })}
+          slotProps={{
+            formHelperText: {
+              sx: { color: title.length > TITLE_MAX ? 'error.main' : 'text.disabled', textAlign: 'right' },
+            },
           }}
-        >
-          {theme === 'light' ? '\u{1F319}' : '\u{2600}\u{FE0F}'}
-        </button>
-      </header>
+          sx={{ mb: 2 }}
+        />
 
-      {/* 작성 폼 */}
-      <form onSubmit={handleSubmit}>
-        <div
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            borderRadius: '12px',
-            boxShadow: 'var(--shadow-sm)',
-            padding: '24px',
+        {/* 내용 입력 */}
+        <TextField
+          fullWidth
+          variant="outlined"
+          label={t('board:content')}
+          placeholder={t('board:contentPlaceholder')}
+          value={content}
+          onChange={(e) => {
+            if (e.target.value.length <= CONTENT_MAX) {
+              setContent(e.target.value)
+            }
           }}
-        >
-          {/* 제목 입력 */}
-          <div style={{ marginBottom: '16px' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '8px',
-              }}
-            >
-              <label
-                style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                {t('board:title')}
-              </label>
-              <span
-                style={{
-                  fontSize: '12px',
-                  color: title.length > TITLE_MAX ? 'var(--color-error)' : 'var(--text-tertiary)',
-                }}
-              >
-                {t('board:charCount', { current: title.length, max: TITLE_MAX })}
-              </span>
-            </div>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => {
-                if (e.target.value.length <= TITLE_MAX) {
-                  setTitle(e.target.value)
-                }
-              }}
-              placeholder={t('board:titlePlaceholder')}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '1px solid var(--input-border)',
-                backgroundColor: 'var(--input-bg)',
-                color: 'var(--text-primary)',
-                fontSize: '16px',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
+          disabled={loading}
+          multiline
+          minRows={15}
+          helperText={t('board:charCount', { current: content.length, max: CONTENT_MAX })}
+          slotProps={{
+            formHelperText: {
+              sx: { color: content.length > CONTENT_MAX ? 'error.main' : 'text.disabled', textAlign: 'right' },
+            },
+          }}
+          sx={{ mb: 3 }}
+        />
 
-          {/* 내용 입력 */}
-          <div style={{ marginBottom: '24px' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '8px',
-              }}
-            >
-              <label
-                style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                {t('board:content')}
-              </label>
-              <span
-                style={{
-                  fontSize: '12px',
-                  color: content.length > CONTENT_MAX ? 'var(--color-error)' : 'var(--text-tertiary)',
-                }}
-              >
-                {t('board:charCount', { current: content.length, max: CONTENT_MAX })}
-              </span>
-            </div>
-            <textarea
-              value={content}
-              onChange={(e) => {
-                if (e.target.value.length <= CONTENT_MAX) {
-                  setContent(e.target.value)
-                }
-              }}
-              placeholder={t('board:contentPlaceholder')}
-              disabled={loading}
-              rows={15}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '1px solid var(--input-border)',
-                backgroundColor: 'var(--input-bg)',
-                color: 'var(--text-primary)',
-                fontSize: '15px',
-                lineHeight: '1.6',
-                outline: 'none',
-                resize: 'vertical',
-                boxSizing: 'border-box',
-                minHeight: '300px',
-              }}
-            />
-          </div>
-
-          {/* 버튼 영역 */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              justifyContent: 'flex-end',
-            }}
+        {/* 버튼 영역 */}
+        <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Button
+            variant="outlined"
+            onClick={() => navigate(-1)}
+            disabled={loading}
+            sx={{ borderColor: 'custom.borderColor', color: 'text.secondary' }}
           >
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              disabled={loading}
-              style={{
-                padding: '10px 24px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--text-secondary)',
-                fontSize: '14px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {t('common:cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: '10px 24px',
-                borderRadius: '8px',
-                border: 'none',
-                backgroundColor: loading ? 'var(--border-color)' : 'var(--btn-primary-bg)',
-                color: 'var(--btn-primary-text)',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {loading ? t('common:loading') : t('common:save')}
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
+            {t('common:cancel')}
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? t('common:loading') : t('common:save')}
+          </Button>
+        </Stack>
+      </Paper>
+    </AppLayout>
   )
 }

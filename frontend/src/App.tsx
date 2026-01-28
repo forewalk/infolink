@@ -1,9 +1,13 @@
 /**
- * 메인 앱 컴포넌트 - 라우팅 설정
+ * 메인 앱 컴포넌트 - 라우팅 설정 + MUI ThemeProvider
  */
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 import { useAuthStore } from '@/store/authStore'
+import { useThemeStore } from '@/store/themeStore'
+import { getTheme } from '@/theme'
 import { LoginPage } from '@/pages/LoginPage'
 import { ProductsPage } from '@/pages/ProductsPage'
 import { BoardListPage } from '@/pages/BoardListPage'
@@ -39,6 +43,9 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   const { isAuthenticated, user } = useAuthStore()
+  const { theme: themeMode } = useThemeStore()
+
+  const muiTheme = useMemo(() => getTheme(themeMode), [themeMode])
 
   // 페이지 로드 시 토큰 유효성 확인
   useEffect(() => {
@@ -50,67 +57,70 @@ function App() {
   }, [isAuthenticated, user])
 
   return (
-    <Routes>
-      {/* 루트: /login으로 리다이렉트 */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+    <ThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      <Routes>
+        {/* 루트: /login으로 리다이렉트 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* 로그인 페이지: 비로그인 시만 접근 */}
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
+        {/* 로그인 페이지: 비로그인 시만 접근 */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
 
-      {/* 상품 페이지: 로그인 또는 비회원 모드 필요 */}
-      <Route
-        path="/products"
-        element={
-          <PrivateRoute>
-            <ProductsPage />
-          </PrivateRoute>
-        }
-      />
+        {/* 상품 페이지: 로그인 또는 비회원 모드 필요 */}
+        <Route
+          path="/products"
+          element={
+            <PrivateRoute>
+              <ProductsPage />
+            </PrivateRoute>
+          }
+        />
 
-      {/* 게시판: 목록/상세는 게스트 가능, 작성/수정은 인증 필요 */}
-      <Route
-        path="/board"
-        element={
-          <PrivateRoute>
-            <BoardListPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/board/write"
-        element={
-          <PrivateRoute>
-            <BoardWritePage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/board/edit/:id"
-        element={
-          <PrivateRoute>
-            <BoardWritePage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/board/:id"
-        element={
-          <PrivateRoute>
-            <BoardDetailPage />
-          </PrivateRoute>
-        }
-      />
+        {/* 게시판: 목록/상세는 게스트 가능, 작성/수정은 인증 필요 */}
+        <Route
+          path="/board"
+          element={
+            <PrivateRoute>
+              <BoardListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/write"
+          element={
+            <PrivateRoute>
+              <BoardWritePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/edit/:id"
+          element={
+            <PrivateRoute>
+              <BoardWritePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/:id"
+          element={
+            <PrivateRoute>
+              <BoardDetailPage />
+            </PrivateRoute>
+          }
+        />
 
-      {/* 404: 로그인 페이지로 리다이렉트 */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* 404: 로그인 페이지로 리다이렉트 */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </ThemeProvider>
   )
 }
 

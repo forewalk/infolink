@@ -15,7 +15,7 @@ Infolink - 상품페이지 링크 및 설명, 로그인/어드민 기능을 테�
 - **모노레포**: FastAPI 백엔드 + React 프론트엔드
 - **언어**: Python 3.11+ / TypeScript
 - **데이터베이스**: PostgreSQL (SQLAlchemy async + asyncpg)
-- **주요 라이브러리**: FastAPI, Pydantic v2, Alembic, React, Vite, Axios, Zustand, react-i18next
+- **주요 라이브러리**: FastAPI, Pydantic v2, Alembic, React, Vite, Axios, Zustand, react-i18next, MUI (Material UI)
 
 ### 환경 설정
 
@@ -212,6 +212,90 @@ Zustand 사용, persist 미들웨어로 새로고침 시 상태 유지:
 | `/board/edit/:id` | BoardWritePage | PrivateRoute |
 | `/board/:id` | BoardDetailPage | PrivateRoute |
 | `*` | → `/products` 리다이렉트 | - |
+
+### MUI (Material UI) 테마 및 공통 컴포넌트
+
+#### 테마 구조
+
+MUI ThemeProvider를 사용하여 라이트/다크 테마를 관리:
+- `src/theme/types.ts` - Palette 타입 확장 (`custom.bgTertiary`, `custom.borderColor`)
+- `src/theme/theme.ts` - `getTheme(mode)` 함수 (기존 CSS 변수 색상을 MUI palette에 매핑)
+- `src/theme/index.ts` - barrel export
+
+`App.tsx`에서 `useThemeStore().theme`을 읽어 `useMemo`로 MUI Theme를 생성하고, `<ThemeProvider>` + `<CssBaseline />`으로 래핑.
+
+#### 색상 매핑
+
+| 용도 | MUI palette | 라이트 | 다크 |
+|------|-------------|--------|------|
+| 액션 버튼 | `primary.main` | `#4A90D9` | `#5B9BD5` |
+| 로그인/확인 버튼 | `secondary.main` | `#4CAF50` | `#4CAF50` |
+| 기본 배경 | `background.default` | `#FAFAFA` | `#1A1A1A` |
+| 카드 배경 | `background.paper` | `#FFFFFF` | `#2D2D2D` |
+| 3차 배경 | `custom.bgTertiary` | `#F5F5F5` | `#3D3D3D` |
+| 기본 텍스트 | `text.primary` | `#1A1A1A` | `#FFFFFF` |
+| 보조 텍스트 | `text.secondary` | `#666666` | `#AAAAAA` |
+| 비활성 텍스트 | `text.disabled` | `#999999` | `#888888` |
+| 테두리 | `custom.borderColor` | `#CCCCCC` | `#444444` |
+| 구분선 | `divider` | `#E5E5E5` | `#3D3D3D` |
+
+#### 공통 레이아웃 컴포넌트
+
+| 컴포넌트 | 위치 | 역할 |
+|----------|------|------|
+| `AppLayout` | `components/layout/AppLayout.tsx` | 페이지 래퍼 (AppHeader + Container + 배경) |
+| `AppHeader` | `components/layout/AppHeader.tsx` | AppBar + Toolbar (타이틀, 뒤로가기, 언어/테마/로그아웃) |
+| `ThemeToggle` | `components/common/ThemeToggle.tsx` | 다크모드 토글 IconButton |
+| `LanguageSelect` | `components/common/LanguageSelect.tsx` | MUI Select 기반 언어 선택 |
+
+**사용법:**
+```tsx
+// 기본 페이지 레이아웃 (헤더 + 컨텐츠)
+<AppLayout title="페이지 제목">
+  <Paper elevation={1}>내용</Paper>
+</AppLayout>
+
+// 뒤로가기 버튼 포함
+<AppLayout title="상세" showBack backTo="/board">
+  <Paper>내용</Paper>
+</AppLayout>
+```
+
+`AppLayout`은 AppHeader(언어 선택, 다크모드 토글, 로그아웃 버튼 포함) + Container를 자동으로 구성하므로, 개별 페이지에서 헤더를 중복 구현할 필요가 없음.
+
+#### 모달 컴포넌트
+
+| 컴포넌트 | 위치 | 역할 |
+|----------|------|------|
+| `GuestModeModal` | `components/common/GuestModeModal.tsx` | MUI Dialog 기반 비회원 모드 안내 |
+| `LoginRequiredModal` | `components/common/LoginRequiredModal.tsx` | MUI Dialog 기반 로그인 필수 안내 |
+
+**새 모달 작성 시 패턴:**
+```tsx
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
+
+<Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
+  <DialogTitle>제목</DialogTitle>
+  <DialogContent>내용</DialogContent>
+  <DialogActions>
+    <Button variant="outlined" onClick={onClose}>취소</Button>
+    <Button variant="contained" color="secondary" onClick={onConfirm}>확인</Button>
+  </DialogActions>
+</Dialog>
+```
+
+#### MUI 컴포넌트 사용 규칙
+
+- **인라인 스타일 금지**: `style={{}}` 대신 MUI의 `sx` prop 사용
+- **색상 참조**: 하드코딩 대신 palette 참조 (예: `color="text.secondary"`, `sx={{ bgcolor: 'background.paper' }}`)
+- **버튼 색상 구분**: 일반 액션은 `color="primary"`, 로그인/확인 계열은 `color="secondary"`, 삭제는 `color="error"`
+- **카드/패널**: `Paper elevation={1}` 또는 `Card` 사용
+- **아이콘**: `@mui/icons-material`에서 개별 import (예: `import EditIcon from '@mui/icons-material/Edit'`)
+- **레이아웃**: 페이지는 `AppLayout`으로 감싸고, 내부는 `Box`, `Stack`, `Container` 활용
 
 ### i18n (다국어 지원)
 

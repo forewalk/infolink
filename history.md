@@ -1,5 +1,49 @@
 # 작업 이력
 
+## 2026-01-28 - MUI 전체 도입
+
+### MUI (Material UI) 마이그레이션
+- 모든 인라인 스타일을 MUI 컴포넌트로 전환
+- `@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled` 설치 (v7.3.7)
+
+### MUI 테마 시스템 구축
+- `src/theme/types.ts`: Palette 타입 확장 (custom.bgTertiary, custom.borderColor)
+- `src/theme/theme.ts`: `getTheme(mode)` 함수 - 기존 CSS 변수 색상을 MUI palette에 매핑
+- `App.tsx`: `ThemeProvider` + `CssBaseline` 래핑, `useMemo`로 테마 생성
+- `themeStore.ts`: DOM 조작(`applyTheme`, `data-theme`) 제거, 상태만 유지
+
+### 공통 레이아웃 컴포넌트 신규 생성
+- `components/layout/AppLayout.tsx`: 페이지 래퍼 (AppHeader + Container + 배경)
+- `components/layout/AppHeader.tsx`: AppBar + Toolbar (타이틀, 뒤로가기, 언어/테마/로그아웃)
+- `components/common/ThemeToggle.tsx`: MUI IconButton (DarkMode/LightMode)
+- `components/common/LanguageSelect.tsx`: MUI Select (i18n 언어 감지 정규화 포함)
+- 4개 페이지에 반복되던 헤더 코드를 공통 컴포넌트로 통합
+
+### 모달 → MUI Dialog 전환
+- `GuestModeModal.tsx`: Dialog + DialogTitle/Content/Actions
+- `LoginRequiredModal.tsx`: Dialog + Close IconButton
+
+### 페이지별 MUI 전환
+- `LoginPage.tsx`: Avatar(로고 이미지), TextField(filled), Button(secondary), 수직 중앙 정렬
+- `ProductsPage.tsx`: AppLayout, Paper elevation
+- `BoardListPage.tsx`: Card + CardActionArea, Stack
+- `BoardDetailPage.tsx`: Paper, Divider, EditIcon/DeleteIcon
+- `BoardWritePage.tsx`: TextField(outlined) with label/helperText, Paper(form)
+
+### 로고 추가
+- `src/images/logo.png`: goodnak.png 로고 이미지 적용 (LoginPage Avatar)
+
+### CSS 정리
+- `src/styles/themes.css` 삭제 (MUI ThemeProvider가 대체)
+- `main.tsx`에서 themes.css import 제거
+- `index.css` 최소화 (CssBaseline이 대체)
+
+### 문서 업데이트
+- `CLAUDE.md`: MUI 테마/공통 컴포넌트/모달 패턴/사용 규칙 섹션 추가
+- `readme.md`: 기술 스택에 MUI 추가
+
+---
+
 ## 2026-01-28 - 프론트엔드 UI 개선
 
 ### 첫 화면 변경

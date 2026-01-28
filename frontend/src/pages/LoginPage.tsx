@@ -1,27 +1,29 @@
 /**
  * 로그인 페이지
- * 피그마 디자인 기반 (375x812 모바일 우선)
- * 다크모드 + 다국어 지원
+ * MUI 컴포넌트 기반, 다크모드 + 다국어 지원
  */
 import { useState, useCallback, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import Box from '@mui/material/Box'
+import Avatar from '@mui/material/Avatar'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
 import { useAuth } from '@/hooks/useAuth'
-import { useThemeStore } from '@/store/themeStore'
+import logoImg from '@/images/logo.png'
+import { ThemeToggle } from '@/components/common/ThemeToggle'
+import { LanguageSelect } from '@/components/common/LanguageSelect'
 import { GuestModeModal } from '@/components/common/GuestModeModal'
 
 export function LoginPage() {
-  const { t, i18n } = useTranslation(['auth', 'common'])
+  const { t } = useTranslation(['auth', 'common'])
   const { login, enterGuestMode } = useAuth()
-  const { theme, toggleTheme } = useThemeStore()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showGuestModal, setShowGuestModal] = useState(false)
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng)
-  }
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -53,222 +55,143 @@ export function LoginPage() {
   }, [enterGuestMode])
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: '100vh',
-        backgroundColor: 'var(--bg-primary)',
+        bgcolor: 'background.default',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '60px 24px 40px',
+        justifyContent: 'center',
+        px: 3,
+        py: 5,
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       {/* 상단 컨트롤: 언어 선택 + 다크모드 토글 */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '16px',
-          right: '16px',
-          display: 'flex',
-          gap: '8px',
-          zIndex: 2,
-        }}
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}
       >
-        <select
-          value={i18n.language}
-          onChange={(e) => changeLanguage(e.target.value)}
-          style={{
-            padding: '6px 12px',
-            borderRadius: '6px',
-            border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="ko">한글</option>
-          <option value="en">English</option>
-        </select>
-
-        <button
-          type="button"
-          onClick={toggleTheme}
-          style={{
-            padding: '6px 12px',
-            borderRadius: '6px',
-            border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            fontSize: '16px',
-          }}
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
-      </div>
+        <LanguageSelect />
+        <ThemeToggle />
+      </Stack>
 
       {/* 장식 원형 요소 */}
-      <div
-        style={{
+      <Box
+        sx={{
           position: 'absolute',
-          top: '-60px',
-          left: '-60px',
-          width: '180px',
-          height: '180px',
+          top: -60,
+          left: -60,
+          width: 180,
+          height: 180,
           borderRadius: '50%',
-          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          bgcolor: 'rgba(76, 175, 80, 0.1)',
         }}
       />
-      <div
-        style={{
+      <Box
+        sx={{
           position: 'absolute',
-          top: '40px',
-          right: '-40px',
-          width: '120px',
-          height: '120px',
+          top: 40,
+          right: -40,
+          width: 120,
+          height: 120,
           borderRadius: '50%',
-          backgroundColor: 'rgba(0, 199, 60, 0.08)',
+          bgcolor: 'rgba(0, 199, 60, 0.08)',
         }}
       />
 
       {/* 로고 */}
-      <div
-        style={{
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          backgroundColor: '#4CAF50',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '24px',
+      <Avatar
+        src={logoImg}
+        alt="Goodnak"
+        sx={{
+          width: 80,
+          height: 80,
+          mb: 3,
           zIndex: 1,
         }}
-      >
-        <span
-          style={{
-            color: '#fff',
-            fontSize: '28px',
-            fontWeight: '700',
-          }}
-        >
-          GN
-        </span>
-      </div>
+      />
 
       {/* 제목 */}
-      <h1
-        style={{
-          fontSize: '24px',
-          fontWeight: '600',
-          color: 'var(--text-primary)',
-          margin: '0 0 8px 0',
-          zIndex: 1,
-        }}
-      >
+      <Typography variant="h5" fontWeight={600} color="text.primary" sx={{ mb: 1, zIndex: 1 }}>
         {t('common:appName')}
-      </h1>
-      <p
-        style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          margin: '0 0 40px 0',
-          zIndex: 1,
-        }}
-      >
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 5, zIndex: 1 }}>
         {t('auth:appDescription')}
-      </p>
+      </Typography>
 
       {/* 로그인 폼 */}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: '100%',
-          maxWidth: '327px',
-          zIndex: 1,
-        }}
-      >
-        <div style={{ marginBottom: '16px' }}>
-          <input
-            type="email"
-            placeholder={t('auth:email')}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '16px',
-              borderRadius: '12px',
-              border: 'none',
-              backgroundColor: 'var(--bg-tertiary)',
-              fontSize: '16px',
-              color: 'var(--text-primary)',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '24px' }}>
-          <input
-            type="password"
-            placeholder={t('auth:password')}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '16px',
-              borderRadius: '12px',
-              border: 'none',
-              backgroundColor: 'var(--bg-tertiary)',
-              fontSize: '16px',
-              color: 'var(--text-primary)',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <button
-          type="submit"
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 327, zIndex: 1 }}>
+        <TextField
+          type="email"
+          placeholder={t('auth:email')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
-          style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: '12px',
-            border: 'none',
-            backgroundColor: isLoading ? 'var(--border-color)' : '#4CAF50',
-            color: '#fff',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            marginBottom: '16px',
+          fullWidth
+          variant="filled"
+          slotProps={{ input: { disableUnderline: true } }}
+          sx={{
+            mb: 2,
+            '& .MuiFilledInput-root': {
+              borderRadius: '12px',
+              bgcolor: 'custom.bgTertiary',
+              py: 0,
+            },
+            '& .MuiFilledInput-input': {
+              py: '16px',
+              fontSize: 16,
+            },
           }}
+        />
+
+        <TextField
+          type="password"
+          placeholder={t('auth:password')}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+          fullWidth
+          variant="filled"
+          slotProps={{ input: { disableUnderline: true } }}
+          sx={{
+            mb: 3,
+            '& .MuiFilledInput-root': {
+              borderRadius: '12px',
+              bgcolor: 'custom.bgTertiary',
+              py: 0,
+            },
+            '& .MuiFilledInput-input': {
+              py: '16px',
+              fontSize: 16,
+            },
+          }}
+        />
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="secondary"
+          fullWidth
+          disabled={isLoading}
+          sx={{ py: 1.5, borderRadius: '12px', fontWeight: 600, fontSize: 16, mb: 2 }}
         >
           {isLoading ? t('auth:loggingIn') : t('auth:loginButton')}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={handleGuestClick}
           disabled={isLoading}
-          style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: '12px',
-            border: 'none',
-            backgroundColor: 'transparent',
-            color: 'var(--text-tertiary)',
-            fontSize: '14px',
-            cursor: 'pointer',
-          }}
+          fullWidth
+          sx={{ color: 'text.disabled', fontSize: 14 }}
         >
           {t('auth:guestMode')}
-        </button>
-      </form>
+        </Button>
+      </Box>
 
       {/* 비회원 안내 모달 */}
       <GuestModeModal
@@ -276,6 +199,6 @@ export function LoginPage() {
         onClose={() => setShowGuestModal(false)}
         onConfirm={handleGuestConfirm}
       />
-    </div>
+    </Box>
   )
 }
